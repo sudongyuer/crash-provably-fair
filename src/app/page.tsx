@@ -36,7 +36,7 @@ export default function Home() {
             <hr/>
             <h1>Crash points:</h1>
 
-            {!( !server_seed || server_seed.length !== 64 ) ? (
+            { !server_seed || server_seed.length !== 64 ? (
                 <h3 style={{color: "red"}}>
                     Please enter a server seed to view this table
                 </h3>
