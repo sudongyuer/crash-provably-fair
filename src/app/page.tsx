@@ -51,29 +51,30 @@ export default function Home() {
                     </thead>
                     <tbody>
                     {chain.map((seed, index) => {
-                        const hash = crypto
-                            .createHmac("sha256", seed)
-                            .update(clientSeed)
-                            .digest("hex");
-                        console.log(hash)
-                        const divisible = (hash: string, mod: number) => {
-                            const val = parseInt(hash.slice(0, 13), 16) % mod
-                            return val === 0;
-                        };
+                        function getPointAndHash() {
+                            const hash = crypto
+                                .createHmac("sha256", seed)
+                                .update(clientSeed)
+                                .digest("hex");
+                            const divisible = (hash: string, mod: number) => {
+                                const val = parseInt(hash.slice(0, 13), 16) % mod
+                                return val === 0;
+                            };
 
-                        function getPoint(hash: string) {
-                            // In 1 of 15 games the game crashes instantly.
-                            if (divisible(hash, 20)) return 1.00;
+                            function getPoint(hash: string) {
+                                if (divisible(hash, 20)) return 1.00;
+                                let h = parseInt(hash.slice(0, 13), 16);
+                                let e = Math.pow(2, 52);
+                                const point = (33 * e - h) / (33 * (e - h))
+                                if (point >= 10000) return 10000
+                                return point.toFixed(2);
+                            }
 
-                            // Use the most significant 52-bit from the hash to calculate the crash point
-                            let h = parseInt(hash.slice(0, 13), 16);
-                            let e = Math.pow(2, 52);
-                            const point = ( 33 * e - h ) / ( 33 * ( e - h ) )
-                            if(point >=10000) return 10000
-                            return point.toFixed(2);
+                            const point = getPoint(hash);
+                            return {hash, point};
                         }
 
-                        const point = getPoint(hash);
+                        const {hash, point} = getPointAndHash();
                         return (
                             <tr key={index}>
                                 <td style={{color: Number(point) < 2 ? "red" : "green"}}>
